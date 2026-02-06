@@ -1,0 +1,63 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+int main(){
+    int num_tasks = 3;
+    int task_ids[] = {10, 20, 30};
+    int arrival_val[] = {0, 2, 4};
+    int burst_val[] = {4, 3, 7};
+    int prio_lvl[] = {2, 5, 1};
+
+    int completion_t[5], turnaround_t[5], waiting_t[5];
+    int is_processed[5] = {0};
+    int sequence[50], clock = 0, finished_count = 0, seq_idx = 0;
+    float avg_wt_sum = 0;
+
+    cout << "Gantt chart:\n|";
+    sequence[seq_idx++] = clock;
+
+    while(finished_count < num_tasks){
+        int selection = -1;
+
+        for(int j = 0; j < num_tasks; j++){
+            if(arrival_val[j] <= clock && !is_processed[j]){
+                if(selection == -1 || prio_lvl[j] > prio_lvl[selection])
+                    selection = j;
+            }
+        }
+
+        if(selection == -1){
+            cout << " IDLE |";
+            clock++;
+            sequence[seq_idx++] = clock;
+        }
+        else{
+            cout << " p" << task_ids[selection] << " |";
+
+            clock += burst_val[selection];
+            sequence[seq_idx++] = clock;
+
+            completion_t[selection] = clock;
+            turnaround_t[selection] = completion_t[selection] - arrival_val[selection];
+            waiting_t[selection] = turnaround_t[selection] - burst_val[selection];
+            avg_wt_sum += waiting_t[selection];
+
+            is_processed[selection] = 1;
+            finished_count++;
+        }
+    }
+
+    cout << "\n";
+    for(int k = 0; k < seq_idx; k++)
+        cout << sequence[k] << "\t";
+
+    cout << "\n\nTask\tArrV\tBrsV\tPrio\tComp\tTurn\tWait\n";
+    for(int z = 0; z < num_tasks; z++){
+        cout << "P" << task_ids[z] << "\t" << arrival_val[z] << "\t" << burst_val[z] << "\t"
+            << prio_lvl[z] << "\t" << completion_t[z] << "\t" << turnaround_t[z] << "\t" << waiting_t[z] << endl;
+    }
+
+    cout << "\nAverage Waiting Time: " << avg_wt_sum / num_tasks << endl;
+
+    return 0;
+}
