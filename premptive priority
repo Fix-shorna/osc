@@ -1,72 +1,61 @@
-
-    #include <bits/stdc++.h>
+#include <bits/stdc++.h>
 using namespace std;
+
 int main()
 {
-
     int n;
-    cout << "The total processes: ";
+    cout << "Enter number of processes: ";
     cin >> n;
-    int p[100], at[100], bt[100],et[100], tat[100], wt[100];
-    cout << "Enter Arrival time and Burst time:\n";
+    int pid[100], at[100], bt[100], pr[100];
+    int rt[100], et[100], tat[100], wt[100];
+    int completed = 0, time = 0;
+    cout << "Enter arrival time, burst time and priority:\n";
     for (int i = 0; i < n; i++)
     {
-        p[i] = i + 1;
-        cin >> at[i] >> bt[i];
+        pid[i] = i + 1;
+        cin >> at[i] >> bt[i] >> pr[i];
+        rt[i] = bt[i];
     }
-    for (int i = 0; i < n - 1; i++)
+    int last = -1;
+    while (completed < n)
     {
-        for (int j = 0; j < n - i - 1; j++)
+        int idx = -1;
+        for (int i = 0; i < n; i++)
         {
-            if (at[j] > at[j + 1])
+            if (at[i] <= time && rt[i] > 0)
             {
-                int temp = at[j];
-                at[j] = at[j + 1];
-                at[j + 1] = temp;
-
-                temp = bt[j];
-                bt[j] = bt[j + 1];
-                bt[j + 1] = temp;
-
-                temp = p[j];
-                p[j] = p[j + 1];
-                p[j + 1] = temp;
+                if (idx == -1 || pr[i] > pr[idx])
+                    idx = i;
             }
         }
-    }
-
-    for (int i = 0; i < n; i++)
-    {
-        if (i == 0)
+        if (idx == -1)
         {
-            et[0] = at[0] + bt[0];
+            time++;
+            continue;
         }
-        else
+        rt[idx]--;
+        time++;
+        if (rt[idx] == 0)
         {
-            if (et[i - 1] < at[i])
-            {
-                et[i] = et[i - 1] + (at[i] - et[i - 1]) + bt[i];
-                tat[i] = et[i] - at[i];
-            }
-            else
-            {
-                et[i] = et[i - 1] + bt[i];
-                tat[i] = et[i] - at[i];
-            }
+            et[idx] = time;
+            tat[idx] = et[idx] - at[idx];
+            wt[idx] = tat[idx] - bt[idx];
+            completed++;
         }
     }
-    int totalWT = 0;
+    float avgWT = 0;
+    cout << "\nPID\tAT\tBT\tPR\tET\tTAT\tWT\n";
     for (int i = 0; i < n; i++)
     {
-        tat[i] = et[i] - at[i];
-        wt[i] = tat[i] - bt[i];
-        totalWT += wt[i];
+        cout << pid[i] << "\t"
+             << at[i] << "\t"
+             << bt[i] << "\t"
+             << pr[i] << "\t"
+             << et[i] << "\t"
+             << tat[i] << "\t"
+             << wt[i] << endl;
+        avgWT += wt[i];
     }
-    cout << "\nP\tAT\tBT\tTAT\tWT\n";
-    for (int i = 0; i < n; i++)
-    {
-        cout << "P" << p[i] << "\t" << at[i] << "\t" << bt[i] << "\t" << tat[i] << "\t" << wt[i] << "\n";
-    }
-    cout << "AVG> waiting time = " << (float)totalWT / n << endl;
+    cout << "\nAverage Waiting Time = " << avgWT / n << endl;
     return 0;
 }
